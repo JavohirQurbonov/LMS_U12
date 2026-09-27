@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirish — EduLMS</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="brand"><span class="logo">&#9733;</span> EduLMS</div>
+        <p class="sub">Hisobingizga kiring</p>
+
+        {% if form.errors %}
+        <div class="msg error">Login yoki parol noto'g'ri.</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label for="id_username">Foydalanuvchi nomi</label>
+                {{ form.username }}
+            </div>
+            <div class="field">
+                <label for="id_password">Parol</label>
+                {{ form.password }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Kirish</button>
+        </form>
+
+        <p class="auth-foot">Hisob administrator tomonidan beriladi.</p>
+    </div>
+</div>
+</body>
+</html>

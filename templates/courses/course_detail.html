@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.name }} — EduLMS{% endblock %}
+{% block heading %}{{ course.name }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:course_list' %}">Kurslar</a> / {{ course.name }}</div>{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-body" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+        <div class="course-thumb" style="width:120px;height:90px;border-radius:12px;flex-shrink:0;font-size:30px;">
+            {% if course.image %}<img src="{{ course.image.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">{% else %}&#9783;{% endif %}
+        </div>
+        <div style="flex:1;min-width:240px;">
+            <p style="color:var(--muted);margin-bottom:10px;">{{ course.description|default:"Tavsif kiritilmagan." }}</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <span class="badge badge-primary">{{ course.modules.count }} modul</span>
+                <span class="badge badge-success">{{ course.lesson_count }} dars</span>
+                <span class="badge badge-muted">{{ course.duration }} oy</span>
+                <span class="badge badge-warning">{{ course.price }} so'm</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-title">Kurs dasturi</div>
+{% for module in course.modules.all %}
+<div class="module">
+    <div class="module-head">
+        <span class="idx">{{ forloop.counter }}</span>
+        <h3>{{ module.title }}</h3>
+        <span class="badge badge-muted">{{ module.lessons.count }} dars</span>
+    </div>
+    <div class="lesson-list">
+        {% for lesson in module.lessons.all %}
+        <a href="{% url 'courses:lesson_detail' lesson.pk %}" class="lesson-row">
+            <span class="play">&#9654;</span>
+            <span class="t">{{ lesson.title }}</span>
+            <span class="tags">
+                {% if lesson.videos.exists %}<span class="badge badge-primary">&#9654; Video</span>{% endif %}
+                {% if lesson.tests.exists %}<span class="badge badge-success">&#10003; Test</span>{% endif %}
+            </span>
+        </a>
+        {% empty %}
+        <div class="lesson-row"><span class="t" style="color:var(--muted);">Darslar qo'shilmagan.</span></div>
+        {% endfor %}
+    </div>
+</div>
+{% empty %}
+<div class="card"><div class="empty"><div class="ic">&#128214;</div>Bu kursda hali modullar yo'q.</div></div>
+{% endfor %}
+{% endblock %}

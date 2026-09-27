@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Test natijalari — EduLMS{% endblock %}
+{% block heading %}Test natijalari{% endblock %}
+{% block crumb %}<div class="crumb">Boshqaruv / Test natijalari</div>{% endblock %}
+
+{% block content %}
+<div class="card"><div class="card-body" style="padding:0;">
+<table class="tbl">
+    <thead><tr><th>O'quvchi</th><th>Test</th><th>Dars</th><th>Natija</th><th>Holat</th><th>Sana</th></tr></thead>
+    <tbody>
+    {% for r in results %}
+    <tr>
+        <td><b>{{ r.student.full_name }}</b></td>
+        <td>{{ r.test.title }}</td>
+        <td>{{ r.test.lesson.title }}</td>
+        <td><b>{{ r.score|floatformat:0 }}%</b> ({{ r.correct_count }}/{{ r.total_count }})</td>
+        <td>{% if r.passed %}<span class="badge badge-success">O'tdi</span>{% else %}<span class="badge badge-danger">O'tmadi</span>{% endif %}</td>
+        <td>{{ r.submitted_at|date:"d.m.Y H:i" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px;">Test natijalari yo'q.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div></div>
+{% endblock %}

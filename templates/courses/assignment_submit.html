@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignment.title }} — Topshiriq{% endblock %}
+{% block heading %}{{ assignment.title }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:lesson_detail' assignment.lesson.pk %}">{{ assignment.lesson.title }}</a> / Topshiriq</div>{% endblock %}
+
+{% block content %}
+<div class="lesson-grid">
+    <div>
+        <div class="card" style="margin-bottom:20px;"><div class="card-body">
+            {{ assignment.description|default:"Tavsif kiritilmagan."|linebreaks }}
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                {% if assignment.deadline %}<span class="badge badge-warning">&#9201; Muddat: {{ assignment.deadline|date:"d.m.Y H:i" }}</span>{% endif %}
+                <span class="badge badge-primary">Maks. ball: {{ assignment.max_grade|floatformat:0 }}</span>
+                {% if assignment.file %}<a href="{{ assignment.file.url }}" target="_blank" class="badge badge-muted">&#128206; Topshiriq fayli</a>{% endif %}
+            </div>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+            <h3 style="font-size:15px;margin-bottom:16px;">Javobingiz</h3>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="field">
+                    <label>Matn</label>
+                    {{ form.text }}
+                </div>
+                <div class="field">
+                    <label>Fayl</label>
+                    {{ form.file }}
+                </div>
+                <button type="submit" class="btn btn-primary">{% if existing %}Yangilash{% else %}Yuborish{% endif %}</button>
+            </form>
+        </div></div>
+    </div>
+
+    <div class="sticky-side">
+        <div class="card"><div class="card-body">
+            <h3 style="font-size:15px;margin-bottom:14px;">Holat</h3>
+            {% if existing %}
+                <p style="margin-bottom:10px;"><span class="badge badge-success">Yuborilgan</span> {{ existing.submitted_at|date:"d.m.Y H:i" }}</p>
+                {% if existing.is_checked %}
+                <div class="resource"><div class="info"><b>Baho: {{ existing.grade|floatformat:0 }}</b><span>{{ existing.comment|default:"Izoh yo'q" }}</span></div></div>
+                {% else %}
+                <p style="color:var(--muted);font-size:13.5px;">Tekshirilmoqda...</p>
+                {% endif %}
+            {% else %}
+                <p style="color:var(--muted);font-size:13.5px;">Hali yubormadingiz.</p>
+            {% endif %}
+        </div></div>
+    </div>
+</div>
+{% endblock %}

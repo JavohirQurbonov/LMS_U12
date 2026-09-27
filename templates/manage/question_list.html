@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ test.title }} — Savollar{% endblock %}
+{% block heading %}{{ test.title }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:manage_lesson' test.lesson.pk %}">{{ test.lesson.title }}</a> / Savollar</div>{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;gap:8px;">
+        <span class="badge badge-primary">{{ test.total_questions }} ta savol</span>
+        <span class="badge badge-warning">O'tish: {{ test.pass_score }}%</span>
+    </div>
+    <a href="{% url 'courses:manage_question_create' test.pk %}" class="btn btn-primary">&#43; Savol qo'shish</a>
+</div>
+
+{% for q in test.questions.all %}
+<div class="question">
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">
+        <div style="flex:1;">
+            <div class="q-num">Savol {{ forloop.counter }} &middot; {{ q.get_question_type_display }}</div>
+            <div class="q-text">{{ q.text }}</div>
+        </div>
+        <div style="white-space:nowrap;">
+            <a href="{% url 'courses:manage_question_edit' q.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+            <a href="{% url 'courses:manage_question_delete' q.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+        </div>
+    </div>
+    {% for opt in q.options.all %}
+    <div class="option {% if opt.is_correct %}correct{% endif %}" style="cursor:default;">
+        <span style="width:18px;">{% if opt.is_correct %}&#10003;{% endif %}</span>
+        <span>{{ opt.text }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% empty %}
+<div class="card"><div class="empty"><div class="ic">&#10067;</div>Hali savollar yo'q.</div></div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,198 @@
+# =====================================================================
+# compose.yaml — butun tizimni bitta fayl bilan tasvirlash va boshqarish.
+#
+# Servis   — bitta vazifani bajaradigan konteyner (baza, Django, nginx).
+# Volume   — Docker boshqaradigan doimiy xotira. Konteyner o'chirilsa
+#            ham ichidagi ma'lumot saqlanib qoladi.
+# Tarmoq   — compose hamma servislarni bitta ichki tarmoqqa ulaydi.
+#            Servislar bir-biriga NOMI bilan murojaat qiladi:
+#            Django bazaga "db", nginx Django'ga "web" nomi bilan ulanadi.
+#
+# Asosiy buyruqlar (shu fayl turgan papkada):
+#   docker compose up -d --build   — build qilib, hammasini fonda ishga tushirish
+#   docker compose ps              — servislar holati
+#   docker compose logs -f web     — web servisi loglarini jonli kuzatish
+#   docker compose down            — to'xtatish (volume'lar saqlanib qoladi)
+#
+# ${NOMI}          — qiymat shu papkadagi .env faylidan olinadi
+# ${NOMI:-qiymat}  — .env da bo'lmasa yoki bo'sh bo'lsa, shu qiymat olinadi
+# ${NOMI:?xabar}   — .env da bo'lmasa, compose xabarni chiqarib to'xtaydi
+#
+# Eski qo'llanmalarda "docker-compose.yml" nomi uchraydi — u ham ishlaydi,
+# "compose.yaml" esa hozirgi rasmiy nom.
+# =====================================================================
+
+
+# Loyiha nomi. Konteyner va volume nomlari shu so'z bilan boshlanadi:
+# lms-u12-web-1, lms-u12_postgres_data ...
+name: lms-u12
+
+
+services:
+
+  # -------------------------------------------------------------------
+  # 1. db — PostgreSQL ma'lumotlar bazasi
+  # -------------------------------------------------------------------
+  db:
+    # Tayyor rasmiy image. Docker Hub'dan yuklab olinadi, build qilinmaydi.
+    # "18" — PostgreSQL versiyasi, "alpine" — yengil Linux asosidagi variant.
+    image: postgres:18-alpine
+
+    # Konteyner yiqilsa yoki server qayta yuklansa — o'zi qayta ishga tushadi.
+    # Faqat "docker compose stop/down" bilan qo'lda to'xtatilsa, ishga tushmaydi.
+    restart: unless-stopped
+
+    # Image BIRINCHI marta (volume bo'sh paytda) shu qiymatlar bilan
+    # baza va foydalanuvchi yaratadi. Keyin o'zgartirilsa, ta'sir qilmaydi.
+    environment:
+      POSTGRES_DB: "${DB_NAME:-test_db}"
+      POSTGRES_USER: "${DB_USER:-test_db_user}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD .env faylida yozilmagan}"
+
+    # Baza fayllari "postgres_data" volume'ida saqlanadi.
+    # Format: volume_nomi:konteyner_ichidagi_yo'l
+    #
+    # DIQQAT: PostgreSQL 18 dan boshlab yo'l /var/lib/postgresql bo'ldi.
+    # Internetdagi eski qo'llanmalardagi /var/lib/postgresql/data yo'li
+    # 18-versiyada xato: ma'lumot boshqa joyga yoziladi va konteyner
+    # qayta yaratilganda baza bo'm-bo'sh chiqadi.
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    # Sog'liq tekshiruvi: baza so'rov qabul qilishga tayyormi?
+    # pg_isready har 5 soniyada tekshiradi, 10 marta urinadi.
+    # "web" servisi shu tekshiruv muvaffaqiyatli (healthy) bo'lishini kutadi.
+    #
+    # -h localhost  — tarmoq orqali tekshirish. Usiz baza hali ishga tushib
+    #                 bo'lmagan paytda ham "tayyor" deb javob berishi mumkin.
+    # $$            — compose uchun "$" belgisi. O'zgaruvchi .env dan emas,
+    #                 konteyner ichidan o'qiladi.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    # "ports" bo'limi ATAYLAB YO'Q: baza internetga ochilmaydi.
+    # Unga faqat shu ichki tarmoqdagi servislar (web) ulana oladi.
+
+
+  # -------------------------------------------------------------------
+  # 2. web — Django + Gunicorn
+  # -------------------------------------------------------------------
+  web:
+    # Image shu papkadagi Dockerfile asosida quriladi ("." — joriy papka).
+    build: .
+
+    restart: unless-stopped
+
+    # Django'ning settings.py os.environ orqali o'qiydigan o'zgaruvchilar.
+    # Chap tomon — konteyner ichidagi nom, o'ng tomon — .env dagi qiymat.
+    environment:
+      SECRET_KEY: "${SECRET_KEY:?SECRET_KEY .env faylida yozilmagan}"
+      DEBUG: "${DEBUG:-False}"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost,127.0.0.1}"
+      CSRF_TRUSTED_ORIGINS: "${CSRF_TRUSTED_ORIGINS:-}"
+      USE_HTTPS: "${USE_HTTPS:-False}"
+      SECURE_HSTS_SECONDS: "${SECURE_HSTS_SECONDS:-3600}"
+      DB_NAME: "${DB_NAME:-test_db}"
+      DB_USER: "${DB_USER:-test_db_user}"
+      DB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD .env faylida yozilmagan}"
+      # Baza manzili — servis nomi. Docker'ning ichki DNS'i "db" nomini
+      # baza konteynerining IP manziliga aylantiradi. Shuning uchun
+      # bu qiymat .env da emas, shu yerda qat'iy yozilgan.
+      DB_HOST: "db"
+      DB_PORT: "5432"
+
+    # Ikki volume ulanadi:
+    #   static_data — collectstatic yig'gan CSS/JS fayllar
+    #   media_data  — foydalanuvchilar yuklagan fayllar (videolar, rasmlar)
+    # Xuddi shu volume'lar nginx'ga ham ulanadi va nginx ularni o'zi beradi.
+    volumes:
+      - static_data:/app/staticfiles
+      - media_data:/app/media
+
+    # Ishga tushish tartibi: db sog'liq tekshiruvidan o'tmaguncha
+    # web boshlanmaydi. Aks holda Django bazaga ulana olmay yiqiladi.
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # "ports" bu yerda ham YO'Q: Gunicorn'ga to'g'ridan-to'g'ri
+    # internetdan kirib bo'lmaydi, faqat nginx orqali.
+
+
+  # -------------------------------------------------------------------
+  # 3. nginx — tashqi dunyo bilan ishlaydigan yagona servis
+  # -------------------------------------------------------------------
+  nginx:
+    # Nginx'ning barqaror (stable) 1.30 versiyasi, alpine asosida
+    image: nginx:1.30-alpine
+
+    restart: unless-stopped
+
+    # Portlarni ochish. Format: "server_porti:konteyner_porti"
+    #   80  — HTTP
+    #   443 — HTTPS
+    # Butun tizimda faqat shu ikki port tashqariga ochiq.
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      # Nginx konfiguratsiyasi. Qaysi fayl ulanishini .env dagi NGINX_CONF hal qiladi:
+      #   NGINX_CONF=http   — nginx/http.conf  (1-bosqich, sertifikat hali yo'q)
+      #   NGINX_CONF=https  — nginx/https.conf (2-bosqich, sertifikat olingandan keyin)
+      # Oxiridagi ":ro" — read-only, konteyner faylni faqat o'qiy oladi.
+      - ./nginx/${NGINX_CONF:-http}.conf:/etc/nginx/conf.d/default.conf:ro
+
+      # web servisi bilan umumiy volume'lar. Nginx ularni faqat o'qiydi.
+      - static_data:/app/staticfiles:ro
+      - media_data:/app/media:ro
+
+      # Certbot (4-servis) bilan umumiy volume'lar:
+      #   certbot_www  — Let's Encrypt tekshiruvi uchun vaqtinchalik fayllar
+      #   certbot_conf — tayyor SSL sertifikatlar
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+
+    # Ishga tushish tartibi: avval web, keyin nginx.
+    depends_on:
+      - web
+
+
+  # -------------------------------------------------------------------
+  # 4. certbot — Let's Encrypt'dan bepul SSL sertifikat olish
+  # -------------------------------------------------------------------
+  # Bu servis doimiy ishlamaydi. Faqat kerak paytda qo'lda chaqiriladi:
+  #   docker compose run --rm certbot <buyruq>
+  # --rm — ish tugagach konteyner avtomatik o'chiriladi.
+  certbot:
+    image: certbot/certbot:v5.8.0
+
+    # "tools" profiliga tegishli servislar "docker compose up" bilan
+    # ishga tushmaydi. "docker compose run certbot" esa ishlayveradi.
+    profiles: ["tools"]
+
+    # nginx bilan umumiy volume'lar, lekin bu yerda yozish huquqi bilan:
+    # certbot tekshiruv fayllarini va tayyor sertifikatni shu yerga yozadi.
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+
+
+# =====================================================================
+# Named volume'lar — Docker ularni o'zi yaratadi va boshqaradi.
+# Serverda haqiqiy nomlari: lms-u12_postgres_data, lms-u12_media_data ...
+#   docker volume ls
+#
+#   docker compose down     — konteynerlarni o'chiradi, volume'lar QOLADI
+#   docker compose down -v  — volume'larni HAM o'chiradi: baza, yuklangan
+#                             fayllar va sertifikatlar yo'qoladi!
+# =====================================================================
+volumes:
+  postgres_data:
+  static_data:
+  media_data:
+  certbot_www:
+  certbot_conf:

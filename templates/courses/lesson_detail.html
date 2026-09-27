@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+
+{% block title %}{{ lesson.title }} — EduLMS{% endblock %}
+{% block heading %}{{ lesson.title }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:course_detail' course.pk %}">{{ course.name }}</a> / {{ lesson.module.title }}</div>{% endblock %}
+
+{% block content %}
+<div class="lesson-grid">
+    <div>
+        {% if lesson.description %}
+        <div class="card" style="margin-bottom:20px;"><div class="card-body">{{ lesson.description|linebreaks }}</div></div>
+        {% endif %}
+
+        {# ===== Videos ===== #}
+        {% if videos %}
+        <div class="section-title">&#9654; Video darslar</div>
+        {% for v in videos %}
+        <div style="margin-bottom:18px;">
+            {% if v.file %}
+            <div class="video-wrap"><video controls src="{{ v.file.url }}"></video></div>
+            {% elif v.url|is_embeddable %}
+            <div class="video-wrap"><iframe src="{{ v.url|embed_url }}" allowfullscreen></iframe></div>
+            {% elif v.url %}
+            <div class="resource"><div class="ic" style="background:var(--danger-soft);color:var(--danger);">&#9654;</div>
+                <div class="info"><b>{{ v.title }}</b><span>Tashqi video havola</span></div>
+                <a href="{{ v.url }}" target="_blank" class="btn btn-light btn-sm">Ochish</a></div>
+            {% endif %}
+            <div style="font-weight:600;margin-top:8px;">{{ v.title }}</div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {# ===== Presentations ===== #}
+        {% if presentations %}
+        <div class="section-title">&#128202; Prezentatsiyalar</div>
+        {% for p in presentations %}
+        <div class="resource">
+            <div class="ic" style="background:var(--warning-soft);color:var(--warning);">&#128202;</div>
+            <div class="info"><b>{{ p.title }}</b><span>Prezentatsiya fayli</span></div>
+            <a href="{{ p.file.url }}" target="_blank" class="btn btn-light btn-sm">Yuklab olish</a>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {# ===== Materials (info book) ===== #}
+        {% if materials %}
+        <div class="section-title">&#128218; Materiallar (Information Book)</div>
+        {% for m in materials %}
+        <div class="resource">
+            <div class="ic" style="background:var(--primary-soft);color:var(--primary);">&#128214;</div>
+            <div class="info"><b>{{ m.title }}</b><span>{{ m.description|default:"Qo'shimcha material"|truncatewords:12 }}</span></div>
+            {% if m.file %}<a href="{{ m.file.url }}" target="_blank" class="btn btn-light btn-sm">Ochish</a>
+            {% elif m.url %}<a href="{{ m.url }}" target="_blank" class="btn btn-light btn-sm">Havola</a>{% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if not videos and not presentations and not materials %}
+        <div class="card"><div class="empty"><div class="ic">&#128193;</div>Bu darsga hali kontent qo'shilmagan.</div></div>
+        {% endif %}
+    </div>
+
+    {# ===== Sidebar: tests + assignments ===== #}
+    <div class="sticky-side">
+        <div class="card" style="margin-bottom:18px;">
+            <div class="card-body">
+                <h3 style="font-size:15px;margin-bottom:14px;">&#10003; Testlar</h3>
+                {% for t in tests %}
+                <div class="resource" style="margin-bottom:10px;">
+                    <div class="ic" style="background:var(--success-soft);color:var(--success);">&#10003;</div>
+                    <div class="info"><b>{{ t.title }}</b><span>{{ t.total_questions }} ta savol</span></div>
+                    {% if t.id in passed_test_ids %}
+                    <span class="badge badge-success">O'tildi</span>
+                    {% else %}
+                    <a href="{% url 'courses:test_take' t.pk %}" class="btn btn-primary btn-sm">Boshlash</a>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p style="color:var(--muted);font-size:13.5px;">Test yo'q.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h3 style="font-size:15px;margin-bottom:14px;">&#128221; Topshiriqlar</h3>
+                {% for a in assignments %}
+                <div class="resource" style="margin-bottom:10px;">
+                    <div class="ic" style="background:var(--warning-soft);color:var(--warning);">&#128221;</div>
+                    <div class="info"><b>{{ a.title }}</b>
+                        <span>{% if a.id in submissions %}Yuborilgan{% else %}Topshirilmagan{% endif %}</span>
+                    </div>
+                    <a href="{% url 'courses:assignment_submit' a.pk %}" class="btn btn-light btn-sm">{% if a.id in submissions %}Ko'rish{% else %}Bajarish{% endif %}</a>
+                </div>
+                {% empty %}
+                <p style="color:var(--muted);font-size:13.5px;">Topshiriq yo'q.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

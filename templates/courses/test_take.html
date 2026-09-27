@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ test.title }} — Test{% endblock %}
+{% block heading %}{{ test.title }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:lesson_detail' test.lesson.pk %}">{{ test.lesson.title }}</a> / Test</div>{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:20px;">
+    <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        {% if test.description %}<p style="flex:1;min-width:200px;color:var(--muted);">{{ test.description }}</p>{% endif %}
+        <span class="badge badge-primary">{{ test.total_questions }} ta savol</span>
+        <span class="badge badge-warning">O'tish: {{ test.pass_score }}%</span>
+        {% if test.time_limit %}<span class="badge badge-muted">&#9201; {{ test.time_limit }} daqiqa</span>{% endif %}
+    </div>
+</div>
+
+<form method="post" action="{% url 'courses:test_submit' test.pk %}">
+    {% csrf_token %}
+    {% for q in test.questions.all %}
+    <div class="question">
+        <div class="q-num">Savol {{ forloop.counter }} {% if q.is_multiple %}&middot; bir nechta javob{% endif %}</div>
+        <div class="q-text">{{ q.text }}</div>
+        {% for opt in q.options.all %}
+        <label class="option">
+            <input type="{% if q.is_multiple %}checkbox{% else %}radio{% endif %}" name="question_{{ q.id }}" value="{{ opt.id }}">
+            <span>{{ opt.text }}</span>
+        </label>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="card"><div class="empty"><div class="ic">&#10067;</div>Bu testda savollar yo'q.</div></div>
+    {% endfor %}
+
+    {% if test.questions.all %}
+    <button type="submit" class="btn btn-primary" style="margin-top:8px;">Testni yakunlash</button>
+    {% endif %}
+</form>
+{% endblock %}

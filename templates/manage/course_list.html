@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Kurslarni boshqarish — EduLMS{% endblock %}
+{% block heading %}Kurslarni boshqarish{% endblock %}
+{% block crumb %}<div class="crumb">Boshqaruv / Kurslar</div>{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+    {% if can_create %}<a href="{% url 'courses:manage_course_create' %}" class="btn btn-primary">&#43; Yangi kurs</a>{% endif %}
+</div>
+
+<div class="card"><div class="card-body" style="padding:0;">
+<table class="tbl">
+    <thead><tr><th>Kurs</th><th>Modullar</th><th>Darslar</th><th>Narx</th><th></th></tr></thead>
+    <tbody>
+    {% for course in courses %}
+    <tr>
+        <td><b>{{ course.name }}</b></td>
+        <td>{{ course.modules.count }}</td>
+        <td>{{ course.lesson_count }}</td>
+        <td>{{ course.price }} so'm</td>
+        <td style="text-align:right;white-space:nowrap;">
+            <a href="{% url 'courses:manage_course_detail' course.pk %}" class="btn btn-primary btn-sm">Boshqarish</a>
+            <a href="{% url 'courses:manage_course_edit' course.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+            {% if can_create %}<a href="{% url 'courses:manage_course_delete' course.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>{% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px;">Kurslar yo'q.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div></div>
+{% endblock %}

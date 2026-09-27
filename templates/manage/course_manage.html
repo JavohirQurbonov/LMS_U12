@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.name }} — Boshqaruv{% endblock %}
+{% block heading %}{{ course.name }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:manage_course_list' %}">Kurslar</a> / Boshqarish</div>{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <a href="{% url 'courses:manage_module_create' course.pk %}" class="btn btn-primary">&#43; Modul qo'shish</a>
+    <a href="{% url 'courses:manage_course_edit' course.pk %}" class="btn btn-light">Kurs ma'lumotlari</a>
+</div>
+
+{% for module in course.modules.all %}
+<div class="module">
+    <div class="module-head">
+        <span class="idx">{{ forloop.counter }}</span>
+        <h3>{{ module.title }}</h3>
+        <a href="{% url 'courses:manage_lesson_create' module.pk %}" class="btn btn-light btn-sm">&#43; Dars</a>
+        <a href="{% url 'courses:manage_module_edit' module.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+        <a href="{% url 'courses:manage_module_delete' module.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+    </div>
+    <div class="lesson-list">
+        {% for lesson in module.lessons.all %}
+        <div class="lesson-row">
+            <span class="play">&#9654;</span>
+            <span class="t">{{ lesson.title }}</span>
+            <a href="{% url 'courses:manage_lesson' lesson.pk %}" class="btn btn-primary btn-sm">Kontent</a>
+            <a href="{% url 'courses:manage_lesson_edit' lesson.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+            <a href="{% url 'courses:manage_lesson_delete' lesson.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+        </div>
+        {% empty %}
+        <div class="lesson-row"><span class="t" style="color:var(--muted);">Darslar yo'q.</span></div>
+        {% endfor %}
+    </div>
+</div>
+{% empty %}
+<div class="card"><div class="empty"><div class="ic">&#128214;</div>Hali modullar yo'q. "Modul qo'shish" tugmasini bosing.</div></div>
+{% endfor %}
+{% endblock %}

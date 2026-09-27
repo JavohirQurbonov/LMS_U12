@@ -1,0 +1,51 @@
+# =====================================================================
+# .dockerignore — image ichiga KIRMAYDIGAN fayl va papkalar.
+#
+# Dockerfile'dagi "COPY . ." buyrug'i shu ro'yxatdagilarni tashlab ketadi.
+# Foydasi:
+#   - maxfiy fayllar (.env) image ichiga tushib qolmaydi
+#   - image hajmi kichik, build tezroq
+#   - lokal "axlat" (kesh, IDE sozlamalari) serverga ketmaydi
+#
+# Yozilishi .gitignore ga o'xshaydi. "**/" — istalgan chuqurlikdagi papka.
+# =====================================================================
+
+
+# Maxfiy sozlamalar. Ular image'ga emas, konteyner ishga tushayotganda
+# compose.yaml orqali beriladi.
+.env
+*.env
+
+# Git tarixi va muharrir (IDE) sozlamalari — dastur ishlashi uchun kerak emas
+.git
+.gitignore
+.idea
+.vscode
+**/.DS_Store
+
+# Lokal virtual muhit. Image ichida paketlar requirements.txt dan
+# qaytadan o'rnatiladi (Mac va Linux paketlari bir xil emas).
+.venv
+venv
+env
+
+# Python kesh fayllari
+**/__pycache__
+**/*.py[cod]
+
+# Lokal ma'lumotlar. Serverda baza PostgreSQL konteynerida,
+# yuklangan fayllar va static esa volume'larda turadi.
+db.sqlite3
+db.sqlite3-journal
+data.json
+*.dump
+media
+staticfiles
+
+# Docker va qo'llanma fayllarining o'zi ishlayotgan dasturga kerak emas
+Dockerfile
+.dockerignore
+compose.yaml
+nginx
+*.md
+*.log

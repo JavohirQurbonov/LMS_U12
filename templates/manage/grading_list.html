@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Baholash — EduLMS{% endblock %}
+{% block heading %}Topshiriqlarni baholash{% endblock %}
+{% block crumb %}<div class="crumb">Boshqaruv / Baholash</div>{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:18px;">
+    <span class="badge badge-warning">{{ pending }} ta kutilmoqda</span>
+</div>
+
+<div class="card"><div class="card-body" style="padding:0;">
+<table class="tbl">
+    <thead><tr><th>O'quvchi</th><th>Topshiriq</th><th>Dars</th><th>Yuborilgan</th><th>Holat</th><th></th></tr></thead>
+    <tbody>
+    {% for s in submissions %}
+    <tr>
+        <td><b>{{ s.student.full_name }}</b></td>
+        <td>{{ s.assignment.title }}</td>
+        <td>{{ s.assignment.lesson.title }}</td>
+        <td>{{ s.submitted_at|date:"d.m.Y H:i" }}</td>
+        <td>
+            {% if s.is_checked %}<span class="badge badge-success">{{ s.grade|floatformat:0 }} ball</span>
+            {% else %}<span class="badge badge-warning">Kutilmoqda</span>{% endif %}
+        </td>
+        <td style="text-align:right;">
+            <a href="{% url 'courses:manage_grade' s.pk %}" class="btn btn-primary btn-sm">{% if s.is_checked %}Ko'rish{% else %}Baholash{% endif %}</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px;">Yuborilgan topshiriqlar yo'q.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div></div>
+{% endblock %}

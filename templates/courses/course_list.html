@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Kurslar — EduLMS{% endblock %}
+{% block heading %}Barcha kurslar{% endblock %}
+{% block crumb %}<div class="crumb">Kurslar katalogi</div>{% endblock %}
+
+{% block content %}
+<div class="grid grid-3">
+    {% for course in courses %}
+    {% include 'courses/_course_card.html' with course=course %}
+    {% empty %}
+    <div class="card"><div class="empty"><div class="ic">&#128230;</div>Hozircha kurslar mavjud emas.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Boshqaruv paneli — EduLMS{% endblock %}
+{% block heading %}Boshqaruv paneli{% endblock %}
+{% block crumb %}<div class="crumb">{% if user.is_admin %}Administrator{% else %}O'qituvchi{% endif %}</div>{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom:28px;">
+    <div class="stat">
+        <div class="ic" style="background:var(--primary-soft);color:var(--primary);">&#9783;</div>
+        <div><div class="num">{{ course_count }}</div><div class="lbl">Kurslar</div></div>
+    </div>
+    <div class="stat">
+        <div class="ic" style="background:var(--success-soft);color:var(--success);">&#128214;</div>
+        <div><div class="num">{{ lesson_count }}</div><div class="lbl">Darslar</div></div>
+    </div>
+    <div class="stat">
+        <div class="ic" style="background:var(--warning-soft);color:var(--warning);">&#128221;</div>
+        <div><div class="num">{{ pending }}</div><div class="lbl">Baholanmagan</div></div>
+    </div>
+    <div class="stat">
+        <div class="ic" style="background:#ede9fe;color:#7c3aed;">&#128101;</div>
+        <div><div class="num">{{ group_count }}</div><div class="lbl">Guruhlar</div></div>
+    </div>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+    {% if user.is_admin %}
+    <a href="{% url 'courses:manage_course_create' %}" class="btn btn-primary">&#43; Yangi kurs</a>
+    <a href="{% url 'courses:manage_group_list' %}" class="btn btn-light">Guruhlar</a>
+    <a href="{% url 'accounts:user_create' %}" class="btn btn-light">&#43; Foydalanuvchi</a>
+    {% endif %}
+    <a href="{% url 'courses:manage_grading' %}" class="btn btn-light">Baholash {% if pending %}<span class="badge badge-warning">{{ pending }}</span>{% endif %}</a>
+    <a href="{% url 'courses:manage_test_results' %}" class="btn btn-light">Test natijalari</a>
+</div>
+
+<div class="section-title">Kurslarim</div>
+<div class="grid grid-3">
+    {% for course in courses %}
+    <div class="card course-card">
+        <a href="{% url 'courses:manage_course_detail' course.pk %}" class="course-thumb" style="text-decoration:none;">
+            {% if course.image %}<img src="{{ course.image.url }}" style="height:100%;object-fit:cover;">{% else %}&#9783;{% endif %}
+        </a>
+        <div class="meta">
+            <h3>{{ course.name }}</h3>
+            <div class="foot">
+                <span class="badge badge-primary">{{ course.modules.count }} modul</span>
+                <a href="{% url 'courses:manage_course_detail' course.pk %}" class="btn btn-light btn-sm">Boshqarish</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card"><div class="empty"><div class="ic">&#128218;</div>Sizda boshqariladigan kurs yo'q.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

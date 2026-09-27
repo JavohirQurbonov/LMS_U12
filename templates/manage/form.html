@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — EduLMS{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block crumb %}<div class="crumb">Boshqaruv</div>{% endblock %}
+
+{% block content %}
+<div style="max-width:680px;">
+<form method="post" {% if multipart %}enctype="multipart/form-data"{% endif %}>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="msg error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="card"><div class="card-body">
+        {% for field in form %}
+        <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="help">{{ field.help_text|safe }}</div>{% endif %}
+            {% for e in field.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+    </div></div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+        <a href="{{ cancel_url }}" class="btn btn-light">Bekor qilish</a>
+    </div>
+</form>
+</div>
+{% endblock %}

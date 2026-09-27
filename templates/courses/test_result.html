@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Test natijasi — EduLMS{% endblock %}
+{% block heading %}Test natijasi{% endblock %}
+{% block crumb %}<div class="crumb">{{ submission.test.title }}</div>{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-body" style="text-align:center;padding:32px;">
+        <div class="score-ring" style="--pct:{{ submission.score|floatformat:0 }};{% if submission.passed %}--ring-color:var(--success);{% else %}--ring-color:var(--danger);{% endif %}">
+            <div class="inner">
+                <b>{{ submission.score|floatformat:0 }}%</b>
+                <span>{{ submission.correct_count }}/{{ submission.total_count }} to'g'ri</span>
+            </div>
+        </div>
+        {% if submission.passed %}
+        <span class="badge badge-success" style="font-size:14px;padding:6px 16px;">&#10003; Testdan o'tdingiz!</span>
+        {% else %}
+        <span class="badge badge-danger" style="font-size:14px;padding:6px 16px;">O'tish chegarasi: {{ submission.test.pass_score }}%</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="section-title">Javoblar tahlili</div>
+{% for ans in answers %}
+<div class="question">
+    <div class="q-num">Savol {{ forloop.counter }}
+        {% if ans.is_correct %}<span class="badge badge-success">To'g'ri</span>{% else %}<span class="badge badge-danger">Xato</span>{% endif %}
+    </div>
+    <div class="q-text">{{ ans.question.text }}</div>
+    {% for opt in ans.question.options.all %}
+    <div class="option {% if opt.is_correct %}correct{% elif opt in ans.selected_options.all %}wrong{% endif %}">
+        <span style="width:18px;">
+            {% if opt.is_correct %}&#10003;{% elif opt in ans.selected_options.all %}&#10007;{% endif %}
+        </span>
+        <span>{{ opt.text }}</span>
+        {% if opt in ans.selected_options.all %}<span class="badge badge-muted" style="margin-left:auto;">Sizning javob</span>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+<a href="{% url 'courses:lesson_detail' submission.test.lesson.pk %}" class="btn btn-light" style="margin-top:8px;">&#8592; Darsga qaytish</a>
+{% endblock %}

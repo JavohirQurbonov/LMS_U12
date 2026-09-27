@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Baholash — EduLMS{% endblock %}
+{% block heading %}Topshiriqni baholash{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:manage_grading' %}">Baholash</a> / {{ submission.student.full_name }}</div>{% endblock %}
+
+{% block content %}
+<div class="lesson-grid">
+    <div>
+        <div class="card" style="margin-bottom:18px;"><div class="card-body">
+            <h3 style="font-size:15px;margin-bottom:10px;">{{ submission.assignment.title }}</h3>
+            <p style="color:var(--muted);font-size:13.5px;margin-bottom:14px;">{{ submission.student.full_name }} &middot; {{ submission.submitted_at|date:"d.m.Y H:i" }}</p>
+            {% if submission.text %}<div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:12px;">{{ submission.text|linebreaks }}</div>{% endif %}
+            {% if submission.file %}<a href="{{ submission.file.url }}" target="_blank" class="btn btn-light btn-sm">&#128206; Yuklangan fayl</a>{% endif %}
+        </div></div>
+
+        <div class="card"><div class="card-body">
+            <h3 style="font-size:15px;margin-bottom:16px;">Baho qo'yish</h3>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }} {% if field.name == 'grade' %}(maks. {{ submission.assignment.max_grade|floatformat:0 }}){% endif %}</label>
+                    {{ field }}
+                    {% for e in field.errors %}<div class="err">{{ e }}</div>{% endfor %}
+                </div>
+                {% endfor %}
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn btn-primary">Saqlash</button>
+                    <a href="{{ cancel_url }}" class="btn btn-light">Orqaga</a>
+                </div>
+            </form>
+        </div></div>
+    </div>
+
+    <div class="sticky-side">
+        <div class="card"><div class="card-body">
+            <h3 style="font-size:15px;margin-bottom:10px;">Holat</h3>
+            {% if submission.is_checked %}
+            <span class="badge badge-success">Baholangan: {{ submission.grade|floatformat:0 }}</span>
+            <p style="color:var(--muted);font-size:13px;margin-top:8px;">{{ submission.graded_at|date:"d.m.Y H:i" }}{% if submission.graded_by %} &middot; {{ submission.graded_by.full_name }}{% endif %}</p>
+            {% else %}
+            <span class="badge badge-warning">Kutilmoqda</span>
+            {% endif %}
+        </div></div>
+    </div>
+</div>
+{% endblock %}

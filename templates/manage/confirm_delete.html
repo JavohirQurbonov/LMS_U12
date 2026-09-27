@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}O'chirish — EduLMS{% endblock %}
+{% block heading %}O'chirishni tasdiqlang{% endblock %}
+{% block crumb %}<div class="crumb">Boshqaruv</div>{% endblock %}
+
+{% block content %}
+<div style="max-width:520px;">
+<div class="card"><div class="card-body">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div class="ic" style="width:48px;height:48px;border-radius:12px;background:var(--danger-soft);color:var(--danger);display:grid;place-items:center;font-size:22px;">&#9888;</div>
+        <div>
+            <b style="font-size:16px;">{{ object_type }} o'chirilsinmi?</b>
+            <p style="color:var(--muted);font-size:14px;">"{{ object }}" butunlay o'chiriladi. Bog'liq ma'lumotlar ham yo'qoladi.</p>
+        </div>
+    </div>
+    <form method="post" style="display:flex;gap:10px;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success" style="background:var(--danger);">Ha, o'chirish</button>
+        <a href="{{ cancel_url }}" class="btn btn-light">Bekor qilish</a>
+    </form>
+</div></div>
+</div>
+{% endblock %}

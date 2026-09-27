@@ -1,0 +1,13 @@
+<a href="{% url 'courses:course_detail' course.pk %}" class="card course-card">
+    <div class="course-thumb">
+        {% if course.image %}<img src="{{ course.image.url }}" alt="{{ course.name }}" style="height:100%;object-fit:cover;">{% else %}&#9783;{% endif %}
+    </div>
+    <div class="meta">
+        <h3>{{ course.name }}</h3>
+        <p>{{ course.description|default:"Tavsif kiritilmagan."|truncatewords:16 }}</p>
+        <div class="foot">
+            <span class="badge badge-primary">{{ course.lesson_count }} dars</span>
+            <span>{{ course.duration }} oy</span>
+        </div>
+    </div>
+</a>

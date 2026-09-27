@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Boshqaruv paneli — EduLMS{% endblock %}
+{% block heading %}Salom, {{ user.get_full_name|default:user.username }} &#128075;{% endblock %}
+{% block crumb %}<div class="crumb">O'quvchi paneli</div>{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom:28px;">
+    <div class="stat">
+        <div class="ic" style="background:var(--primary-soft);color:var(--primary);">&#9783;</div>
+        <div><div class="num">{{ enrolled_courses|length }}</div><div class="lbl">Mening kurslarim</div></div>
+    </div>
+    <div class="stat">
+        <div class="ic" style="background:var(--success-soft);color:var(--success);">&#10003;</div>
+        <div><div class="num">{{ test_results|length }}</div><div class="lbl">Topshirilgan testlar</div></div>
+    </div>
+    <div class="stat">
+        <div class="ic" style="background:var(--warning-soft);color:var(--warning);">&#128221;</div>
+        <div><div class="num">{{ submissions|length }}</div><div class="lbl">Topshiriqlar</div></div>
+    </div>
+    <div class="stat">
+        <div class="ic" style="background:#ede9fe;color:#7c3aed;">&#9733;</div>
+        <div><div class="num">{{ all_courses|length }}</div><div class="lbl">Barcha kurslar</div></div>
+    </div>
+</div>
+
+<div class="section-title">Mening kurslarim</div>
+{% if enrolled_courses %}
+<div class="grid grid-3">
+    {% for course in enrolled_courses %}
+    {% include 'courses/_course_card.html' with course=course %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="card"><div class="empty"><div class="ic">&#128218;</div>Siz hali birorta guruhga biriktirilmagansiz.<br>Quyidagi mavjud kurslarni ko'rib chiqing.</div></div>
+{% endif %}
+
+<div class="section-title">So'nggi test natijalari</div>
+{% if test_results %}
+<div class="card"><div class="card-body" style="padding:0;">
+<table class="tbl">
+    <thead><tr><th>Test</th><th>Natija</th><th>Holat</th><th>Sana</th></tr></thead>
+    <tbody>
+    {% for r in test_results %}
+    <tr>
+        <td>{{ r.test.title }}</td>
+        <td><b>{{ r.score|floatformat:0 }}%</b></td>
+        <td>{% if r.passed %}<span class="badge badge-success">O'tdi</span>{% else %}<span class="badge badge-danger">O'tmadi</span>{% endif %}</td>
+        <td>{{ r.submitted_at|date:"d.m.Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div></div>
+{% else %}
+<div class="card"><div class="empty"><div class="ic">&#128202;</div>Hali test topshirmagansiz.</div></div>
+{% endif %}
+
+<div class="section-title">Mavjud kurslar</div>
+<div class="grid grid-3">
+    {% for course in all_courses %}
+    {% include 'courses/_course_card.html' with course=course %}
+    {% empty %}
+    <div class="card"><div class="empty"><div class="ic">&#128230;</div>Hozircha kurslar yo'q.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

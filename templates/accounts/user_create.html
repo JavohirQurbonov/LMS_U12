@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Yangi foydalanuvchi — EduLMS{% endblock %}
+{% block heading %}Yangi foydalanuvchi qo'shish{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'accounts:user_list' %}">Foydalanuvchilar</a> / Yangi</div>{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;">
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}<div class="msg error">{{ form.non_field_errors }}</div>{% endif %}
+
+    <div class="card" style="margin-bottom:20px;"><div class="card-body">
+        <h3 style="font-size:15px;margin-bottom:16px;">Asosiy ma'lumotlar</h3>
+        <div class="field">
+            <label for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>
+            {{ form.role }}
+            {% for e in form.role.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="field">
+                <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+                {% for e in form.first_name.errors %}<div class="err">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="field">
+                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+                {% for e in form.last_name.errors %}<div class="err">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="field">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% for e in form.email.errors %}<div class="err">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="field">
+                <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                {{ form.phone }}
+                {% for e in form.phone.errors %}<div class="err">{{ e }}</div>{% endfor %}
+            </div>
+        </div>
+    </div></div>
+
+    <div class="card" id="teacher-fields" style="margin-bottom:20px;display:none;"><div class="card-body">
+        <h3 style="font-size:15px;margin-bottom:16px;">O'qituvchi ma'lumotlari</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="field">
+                <label for="{{ form.specialization.id_for_label }}">{{ form.specialization.label }}</label>
+                {{ form.specialization }}
+            </div>
+            <div class="field">
+                <label for="{{ form.experience.id_for_label }}">{{ form.experience.label }}</label>
+                {{ form.experience }}
+            </div>
+        </div>
+    </div></div>
+
+    <div class="card" id="student-fields" style="margin-bottom:20px;display:none;"><div class="card-body">
+        <h3 style="font-size:15px;margin-bottom:16px;">O'quvchi ma'lumotlari</h3>
+        <div class="field">
+            <label for="{{ form.birth_date.id_for_label }}">{{ form.birth_date.label }}</label>
+            {{ form.birth_date }}
+        </div>
+    </div></div>
+
+    <div class="card" style="margin-bottom:20px;"><div class="card-body">
+        <h3 style="font-size:15px;margin-bottom:16px;">Kirish ma'lumotlari</h3>
+        <div class="field">
+            <label for="{{ form.username.id_for_label }}">Foydalanuvchi nomi</label>
+            {{ form.username }}
+            {% for e in form.username.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="field">
+                <label for="{{ form.password1.id_for_label }}">Parol</label>
+                {{ form.password1 }}
+                {% for e in form.password1.errors %}<div class="err">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="field">
+                <label for="{{ form.password2.id_for_label }}">Parolni tasdiqlang</label>
+                {{ form.password2 }}
+                {% for e in form.password2.errors %}<div class="err">{{ e }}</div>{% endfor %}
+            </div>
+        </div>
+        {% if form.password1.help_text %}<div class="help">{{ form.password1.help_text|safe }}</div>{% endif %}
+    </div></div>
+
+    <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn btn-primary">Foydalanuvchini yaratish</button>
+        <a href="{% url 'accounts:user_list' %}" class="btn btn-light">Bekor qilish</a>
+    </div>
+</form>
+</div>
+
+<script>
+(function () {
+    var role = document.getElementById("{{ form.role.id_for_label }}");
+    var t = document.getElementById("teacher-fields");
+    var s = document.getElementById("student-fields");
+    function sync() {
+        var v = role.value;
+        t.style.display = (v === "teacher") ? "" : "none";
+        s.style.display = (v === "student") ? "" : "none";
+    }
+    role.addEventListener("change", sync);
+    sync();
+})();
+</script>
+{% endblock %}

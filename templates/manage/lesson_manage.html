@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} — Kontent{% endblock %}
+{% block heading %}{{ lesson.title }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'courses:manage_course_detail' course.pk %}">{{ course.name }}</a> / {{ lesson.module.title }}</div>{% endblock %}
+
+{% block content %}
+
+{# ===== Videos ===== #}
+<div class="section-title" style="justify-content:space-between;">
+    <span>&#9654; Video darslar</span>
+    <a href="{% url 'courses:manage_video_create' lesson.pk %}" class="btn btn-primary btn-sm">&#43; Video</a>
+</div>
+{% for v in videos %}
+<div class="resource">
+    <div class="ic" style="background:var(--danger-soft);color:var(--danger);">&#9654;</div>
+    <div class="info"><b>{{ v.title }}</b><span>{% if v.file %}Fayl{% else %}{{ v.url }}{% endif %}</span></div>
+    <a href="{% url 'courses:manage_video_edit' v.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+    <a href="{% url 'courses:manage_video_delete' v.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+</div>
+{% empty %}<p style="color:var(--muted);font-size:13.5px;margin-bottom:10px;">Video yo'q.</p>{% endfor %}
+
+{# ===== Presentations ===== #}
+<div class="section-title" style="justify-content:space-between;">
+    <span>&#128202; Prezentatsiyalar</span>
+    <a href="{% url 'courses:manage_presentation_create' lesson.pk %}" class="btn btn-primary btn-sm">&#43; Prezentatsiya</a>
+</div>
+{% for p in presentations %}
+<div class="resource">
+    <div class="ic" style="background:var(--warning-soft);color:var(--warning);">&#128202;</div>
+    <div class="info"><b>{{ p.title }}</b><span>{{ p.file.name }}</span></div>
+    <a href="{% url 'courses:manage_presentation_edit' p.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+    <a href="{% url 'courses:manage_presentation_delete' p.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+</div>
+{% empty %}<p style="color:var(--muted);font-size:13.5px;margin-bottom:10px;">Prezentatsiya yo'q.</p>{% endfor %}
+
+{# ===== Materials ===== #}
+<div class="section-title" style="justify-content:space-between;">
+    <span>&#128218; Materiallar</span>
+    <a href="{% url 'courses:manage_material_create' lesson.pk %}" class="btn btn-primary btn-sm">&#43; Material</a>
+</div>
+{% for m in materials %}
+<div class="resource">
+    <div class="ic" style="background:var(--primary-soft);color:var(--primary);">&#128214;</div>
+    <div class="info"><b>{{ m.title }}</b><span>{{ m.description|default:""|truncatewords:10 }}</span></div>
+    <a href="{% url 'courses:manage_material_edit' m.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+    <a href="{% url 'courses:manage_material_delete' m.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+</div>
+{% empty %}<p style="color:var(--muted);font-size:13.5px;margin-bottom:10px;">Material yo'q.</p>{% endfor %}
+
+{# ===== Tests ===== #}
+<div class="section-title" style="justify-content:space-between;">
+    <span>&#10003; Testlar</span>
+    <a href="{% url 'courses:manage_test_create' lesson.pk %}" class="btn btn-primary btn-sm">&#43; Test</a>
+</div>
+{% for t in tests %}
+<div class="resource">
+    <div class="ic" style="background:var(--success-soft);color:var(--success);">&#10003;</div>
+    <div class="info"><b>{{ t.title }}</b><span>{{ t.total_questions }} ta savol &middot; o'tish {{ t.pass_score }}%</span></div>
+    <a href="{% url 'courses:manage_question' t.pk %}" class="btn btn-primary btn-sm">Savollar</a>
+    <a href="{% url 'courses:manage_test_edit' t.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+    <a href="{% url 'courses:manage_test_delete' t.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+</div>
+{% empty %}<p style="color:var(--muted);font-size:13.5px;margin-bottom:10px;">Test yo'q.</p>{% endfor %}
+
+{# ===== Assignments ===== #}
+<div class="section-title" style="justify-content:space-between;">
+    <span>&#128221; Topshiriqlar</span>
+    <a href="{% url 'courses:manage_assignment_create' lesson.pk %}" class="btn btn-primary btn-sm">&#43; Topshiriq</a>
+</div>
+{% for a in assignments %}
+<div class="resource">
+    <div class="ic" style="background:#ede9fe;color:#7c3aed;">&#128221;</div>
+    <div class="info"><b>{{ a.title }}</b><span>{{ a.submissions.count }} ta yuborilgan</span></div>
+    <a href="{% url 'courses:manage_assignment_edit' a.pk %}" class="btn btn-light btn-sm">Tahrirlash</a>
+    <a href="{% url 'courses:manage_assignment_delete' a.pk %}" class="btn btn-light btn-sm" style="color:var(--danger);">O'chirish</a>
+</div>
+{% empty %}<p style="color:var(--muted);font-size:13.5px;margin-bottom:10px;">Topshiriq yo'q.</p>{% endfor %}
+
+<div style="margin-top:24px;">
+    <a href="{% url 'courses:lesson_detail' lesson.pk %}" class="btn btn-light">&#128065; O'quvchi ko'rinishida ochish</a>
+</div>
+{% endblock %}
